@@ -10,6 +10,6 @@ router.post("/add", drugController.addDrug);
 router.put("/update/:id", drugController.updateDrug);
 
 // Get all drugs (optionally filter by pharmacyId)
-router.get("/", drugController.getDrugs);
+router.get("/:pharmacyId", drugController.getDrugs);
 
 module.exports = router;

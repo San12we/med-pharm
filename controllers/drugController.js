@@ -50,9 +50,11 @@ exports.updateDrug = async (req, res) => {
   }
 };
 
+
+// Get all drugs (filter by pharmacyId)
 exports.getDrugs = async (req, res) => {
   try {
-    const pharmacyId = req.query.pharmacyId; // Get pharmacyId from query params
+    const { pharmacyId } = req.params; // Get pharmacyId from route params
 
     if (!pharmacyId) {
       return res.status(400).json({ error: "Pharmacy ID is required" });
