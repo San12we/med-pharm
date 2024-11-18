@@ -2,55 +2,60 @@
 const Sale = require("../models/Sale");
 const Drug = require("../models/Drug");
 const mongoose = require("mongoose");
+
 exports.recordSale = async (req, res) => {
   try {
-    const { drugId, quantity, pharmacyId, customerName, customerContact } = req.body;
+    const { cart, totalPrice } = req.body;
 
-    // Log the received drugId
-    console.log("Received drugId:", drugId);
+    // Iterate over each item in the cart
+    for (const item of cart) {
+      const { drugId, quantity, pharmacyId, customerName, customerContact } = item;
 
-    // Ensure drugId is a valid ObjectId
-    if (!mongoose.Types.ObjectId.isValid(drugId)) {
-      return res.status(400).json({ error: "Invalid drug ID" });
+      // Log the received drugId
+      console.log("Received drugId:", drugId);
+
+      // Ensure drugId is a valid ObjectId
+      if (!mongoose.Types.ObjectId.isValid(drugId)) {
+        return res.status(400).json({ error: "Invalid drug ID" });
+      }
+
+      // Check if the drug exists
+      const drug = await Drug.findById(drugId);
+      if (!drug) {
+        return res.status(404).json({ error: "Drug not found" });
+      }
+
+      // Check if enough stock is available
+      if (drug.stock < quantity) {
+        return res.status(400).json({ error: "Not enough stock available" });
+      }
+
+      // Calculate total price for the item
+      const itemTotalPrice = drug.price * quantity;
+
+      // Create the sale
+      const sale = new Sale({
+        drugId,
+        quantity,
+        totalPrice: itemTotalPrice,
+        pharmacyId,
+        customerName,
+        customerContact,
+      });
+
+      // Save the sale
+      await sale.save();
+
+      // Adjust stock for the drug
+      drug.stock -= quantity;
+      await drug.save();
     }
 
-    // Check if the drug exists
-    const drug = await Drug.findById(drugId);
-    if (!drug) {
-      return res.status(404).json({ error: "Drug not found" });
-    }
-
-    // Check if enough stock is available
-    if (drug.stock < quantity) {
-      return res.status(400).json({ error: "Not enough stock available" });
-    }
-
-    // Calculate total price
-    const totalPrice = drug.price * quantity;
-
-    // Create the sale
-    const sale = new Sale({
-      drugId,
-      quantity,
-      totalPrice,
-      pharmacyId,
-      customerName,
-      customerContact,
-    });
-
-    // Save the sale
-    await sale.save();
-
-    // Adjust stock for the drug
-    drug.stock -= quantity;
-    await drug.save();
-
-    return res.status(201).json({ message: "Sale recorded successfully", sale });
+    return res.status(201).json({ message: "Sale recorded successfully" });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
-
 // Get all sales for a specific pharmacy
 exports.getSalesByPharmacy = async (req, res) => {
   try {
