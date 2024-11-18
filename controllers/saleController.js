@@ -6,6 +6,14 @@ exports.recordSale = async (req, res) => {
   try {
     const { drugId, quantity, pharmacyId, customerName, customerContact } = req.body;
 
+    // Log the received drugId
+    console.log("Received drugId:", drugId);
+
+    // Ensure drugId is a valid ObjectId
+    if (!mongoose.Types.ObjectId.isValid(drugId)) {
+      return res.status(400).json({ error: "Invalid drug ID" });
+    }
+
     // Check if the drug exists
     const drug = await Drug.findById(drugId);
     if (!drug) {
