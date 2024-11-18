@@ -1,7 +1,7 @@
 // controllers/saleController.js
 const Sale = require("../models/Sale");
 const Drug = require("../models/Drug");
-
+const mongoose = require("mongoose");
 exports.recordSale = async (req, res) => {
   try {
     const { drugId, quantity, pharmacyId, customerName, customerContact } = req.body;
