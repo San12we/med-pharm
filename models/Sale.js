@@ -1,5 +1,6 @@
 // models/Sale.js
 const mongoose = require("mongoose");
+const Drug = require("./Drug"); // Assuming Drug model is in the same directory
 
 const saleSchema = new mongoose.Schema({
   drugId: {
@@ -7,23 +8,34 @@ const saleSchema = new mongoose.Schema({
     ref: "Drug",
     required: true,
   },
-  quantitySold: {
+  quantity: {
     type: Number,
     required: true,
-    min: 1,
+    min: [1, 'Quantity must be at least 1'],
   },
   totalPrice: {
     type: Number,
     required: true,
-    min: 0,
-  },
-  customerName: {
-    type: String,
   },
   saleDate: {
     type: Date,
     default: Date.now,
   },
+  pharmacyId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Pharmacy",
+    required: true,
+  },
+  customerName: {
+    type: String,
+    required: true,
+  },
+  customerContact: {
+    type: String,
+    required: true,
+  },
 });
 
-module.exports = mongoose.model("Sale", saleSchema);
+const Sale = mongoose.model("Sale", saleSchema);
+
+module.exports = Sale;

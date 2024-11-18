@@ -13,8 +13,8 @@ const port = process.env.PORT || 3001;
 
 // Import Routes
 const drugRoutes = require('./routes/drugRoutes');
-/* const salesRoutes = require('./routes/salesRoutes');
- */
+const salesRoutes = require('./routes/salesRoutes');
+
 // Create HTTP server
 const server = http.createServer(app);
 
@@ -26,8 +26,8 @@ app.use(express.json());
 
 // Routes
 app.use('/api', drugRoutes);
-/* app.use('/api', salesRoutes);
- */
+app.use('/api', salesRoutes);
+
 // Connect to MongoDB
 mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log("MongoDB connected"))
