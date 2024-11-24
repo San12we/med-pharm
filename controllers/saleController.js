@@ -1,11 +1,12 @@
-// controllers/saleController.js
 const Sale = require("../models/Sale");
 const Drug = require("../models/Drug");
+const Delivery = require("../models/Delivery");
 const mongoose = require("mongoose");
 
+// Record a sale and create a delivery
 exports.recordSale = async (req, res) => {
   try {
-    const { cart, totalPrice } = req.body;
+    const { cart, totalPrice, deliveryAddress, riderId } = req.body;
 
     // Iterate over each item in the cart
     for (const item of cart) {
@@ -49,14 +50,28 @@ exports.recordSale = async (req, res) => {
       // Adjust stock for the drug
       drug.stock -= quantity;
       await drug.save();
+
+      // Create a delivery record
+      const delivery = new Delivery({
+        saleId: sale._id,
+        pharmacyId,
+        riderId,
+        customerName,
+        customerContact,
+        deliveryAddress,
+        status: "Pending",
+      });
+
+      await delivery.save();
     }
 
-    return res.status(201).json({ message: "Sale recorded successfully" });
+    return res.status(201).json({ message: "Sale and delivery recorded successfully" });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
-// Get all sales for a specific pharmacy
+
+// Get all sales and related deliveries for a specific pharmacy
 exports.getSalesByPharmacy = async (req, res) => {
   try {
     const { pharmacyId } = req.query;
@@ -65,7 +80,17 @@ exports.getSalesByPharmacy = async (req, res) => {
       return res.status(400).json({ error: "Pharmacy ID is required" });
     }
 
-    const sales = await Sale.find({ pharmacyId }).populate("drugId", "name price");
+    // Fetch sales and populate drug and related delivery details
+    const sales = await Sale.find({ pharmacyId })
+      .populate("drugId", "name price")
+      .populate({
+        path: "delivery",
+        select: "status deliveryAddress riderId",
+        populate: {
+          path: "riderId",
+          select: "name contact",
+        },
+      });
 
     if (sales.length === 0) {
       return res.status(404).json({ message: "No sales found for this pharmacy" });
