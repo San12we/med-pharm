@@ -4,8 +4,7 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 const dotenv = require("dotenv");
 const http = require("http");
-// Uncomment if using Socket.IO
-// const { Server } = require("socket.io");
+const { Server } = require("socket.io"); // Uncommented
 
 dotenv.config();
 
@@ -20,13 +19,13 @@ const deliveryRoutes = require("./routes/deliveryRoutes");
 // Create HTTP server
 const server = http.createServer(app);
 
-// Uncomment if enabling Socket.IO
-// const io = new Server(server, {
-//   cors: {
-//     origin: "*", // Adjust as per your frontend URL
-//     methods: ["GET", "POST", "PUT", "DELETE"],
-//   },
-// });
+// Enable Socket.IO
+const io = new Server(server, {
+  cors: {
+    origin: "*", // Adjust this to match your frontend URL
+    methods: ["GET", "POST", "PUT", "DELETE"],
+  },
+});
 
 // Middleware
 app.use(cors());
@@ -57,14 +56,21 @@ mongoose
     process.exit(1); // Exit if the database connection fails
   });
 
-// Uncomment if enabling Socket.IO
-// io.on("connection", (socket) => {
-//   console.log("A user connected:", socket.id);
+// Socket.IO logic
+io.on("connection", (socket) => {
+  console.log("A user connected:", socket.id);
 
-//   socket.on("disconnect", () => {
-//     console.log("User disconnected:", socket.id);
-//   });
-// });
+  // Example of listening for events
+  socket.on("message", (data) => {
+    console.log("Message received:", data);
+    // Broadcast message to all connected clients
+    io.emit("message", data);
+  });
+
+  socket.on("disconnect", () => {
+    console.log("User disconnected:", socket.id);
+  });
+});
 
 // Start the server
 server.listen(port, () => {

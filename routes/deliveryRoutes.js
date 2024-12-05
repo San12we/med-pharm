@@ -11,4 +11,8 @@ router.put("/update-status", deliveryController.updateDeliveryStatus);
 // Get all deliveries for a pharmacy
 router.get("/pharmacy", deliveryController.getDeliveriesByPharmacy);
 
+// Get all deliveries by a rider
+router.get("/rider/:riderId", deliveryController.getDeliveriesByRider);
+
 module.exports = router;
+

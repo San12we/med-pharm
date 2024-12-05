@@ -7,8 +7,7 @@ const deliverySchema = new mongoose.Schema({
     required: true,
   },
   pharmacyId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Pharmacy",
+    type: mongoose.Schema.Types.ObjectId, // Just storing the ObjectId
     required: true,
   },
   riderId: {
